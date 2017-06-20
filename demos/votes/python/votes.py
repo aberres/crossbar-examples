@@ -27,6 +27,8 @@
 ###############################################################################
 
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet import defer
+from twisted.internet import reactor
 
 from autobahn import wamp
 from autobahn.twisted.wamp import ApplicationSession
@@ -48,7 +50,15 @@ class VotesBackend(ApplicationSession):
 
     @wamp.register(u'io.crossbar.demo.vote.get')
     def getVotes(self):
-        return [{'subject': key, 'votes': value} for key, value in self._votes.items()]
+        result = [{'subject': key, 'votes': value} for key, value in self._votes.items()]
+
+        # sleep for 5 seconds before returning the result
+        d = defer.Deferred()
+        reactor.callLater(5.0, d.callback,
+                          result)
+        return d
+
+
 
 
     @wamp.register(u'io.crossbar.demo.vote.vote')
